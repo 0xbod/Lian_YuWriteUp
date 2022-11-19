@@ -1,5 +1,9 @@
-# Lian_YuWriteUp
+# TryHackMe Writeup 
+Lian_Yu Link to try hack me of GamingServer room - https://tryhackme.com/room/lianyu
 
+Hello Guys , Abdelrahman Mohamed. My username on THM is “Sylvesterr”.
+
+# #Step1: Scanning the host
 First, we use NMAP to discover any open port on the host by running the command: nmap 10.10.58.201
 
 ![image](https://user-images.githubusercontent.com/118617364/202856505-54a84a2a-84cc-48d6-ad0d-b92fa598cdf4.png)
@@ -11,3 +15,68 @@ Well, now we use the -A flag in NMAP to view more information about the open por
 We know that SSH port is open we can maybe use it later?
 also, ftp doesn’t allow anonymous login so there should be a username and password for it to login. NMAP would show if ftp allowed anonymous login that’s why I guessed it.
 Anyway, let’s explore the webpage on port 80 maybe we will find something useful. 
+
+![image](https://user-images.githubusercontent.com/118617364/202856738-dbbd0904-113d-47ef-955a-6bf95f1a15b9.png)
+
+Nothing interesting in the webpage here or even the page source as we should always view the page source.
+# #Step2: Finding hidding directories
+Running “gobsuter” to get any hidden directories from the webpage is our target now so let’s use the command: gobuster dir -u http://10.10.58.201 -w /usr/share/wordlists/dirb/big.txt
+
+![image](https://user-images.githubusercontent.com/118617364/202856824-9b50c902-3e5d-43e4-8bba-a8041009da2d.png)
+
+Hooraay, we found a directory called /island, let’s navigate to this directory and see where it gets us
+
+![image](https://user-images.githubusercontent.com/118617364/202856871-17222b0c-827b-49c8-aeab-5369f1202cef.png)
+
+Okay if we check the page source as I mentioned above that’s what we should do cause maybe the developer left any hard coded passwords or evidence that could help us for exploitations.
+
+![image](https://user-images.githubusercontent.com/118617364/202856893-14f951cb-d92c-48f9-ac23-e941ba299042.png)
+
+This code word “vigilante” is interesting it looks like a password or a username for something, who knows. Let’s explore more by running gobuster one more time but we define the directory we found this time: gobuster dir -u http://10.10.58.201/island -w /usr/share/dirbusterwordlists/directory-list-2.3medium.txt
+
+![image](https://user-images.githubusercontent.com/118617364/202856922-8b6769e5-88cf-4e6d-a8b0-e5c04eea3de4.png)
+
+Well well well, we found another directory called “2100” inside the island. Let’s explore it and see what it is.
+
+![image](https://user-images.githubusercontent.com/118617364/202856936-2bdc3d34-4d81-4bf4-8eb4-96b2f0bf6cea.png)
+
+Okay, the video is deleted which confused me, I thought it had something to do with solving the machine, but it turned out to be garbage. Now let’s check the page source.
+
+![image](https://user-images.githubusercontent.com/118617364/202856960-8e26870e-4dc9-4d18-9a03-b6f24aaa5c8a.png)
+
+This “.ticket” looks like some kind of extension. We could try another gobuster but adding the -x flag for extension and search for .ticket. Use the command: gobuster dir -u http://10.10.58.201/island/2100 -w /usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt -x .ticket
+
+![image](https://user-images.githubusercontent.com/118617364/202856970-df287aeb-45a6-4406-b3ed-e29abe87ea5e.png)
+
+Let’s navigate to /green_arrow.ticket and see its contents 
+
+![image](https://user-images.githubusercontent.com/118617364/202856980-4495a160-6615-4987-89d1-1777839a8768.png)
+
+This doesn’t look like a hash, it is some kind of encoding. Let’s try cyberchef to decode. After trying  base64 and  base32 it didn’t get us anywhere, so I decided to try all base encodings.
+
+![image](https://user-images.githubusercontent.com/118617364/202856996-f141a8ec-1282-4d67-b7a4-c43a1adc5f02.png)
+
+It turned out to be base58, for next time you should be aware that it is not only base62-32. Look at the left  side and you will see that we have 6 types of base encodings. Well, now we have what looks like a password “!#th3h00d”. Remember the code name we found earlier in the island page “vigilante”. We now have a username and a password let’s try to login in ftp.
+
+![image](https://user-images.githubusercontent.com/118617364/202857130-826b47bc-73b1-4259-ab8a-d27a722bb45d.png)
+# #Step3: Using what we enumerated
+We successfully logged on ftp, let’s enumerate it and look for any files to download.
+
+![image](https://user-images.githubusercontent.com/118617364/202857153-4302145a-6426-4bd8-99fc-859d9a2a0462.png)
+
+We see 3 images with extension .png inside the vigilante directory.
+It’s time for steganography!!! Before we get distracted with the images. We should look for more information inside ftp, if we try to change directory back we will find that we have 2 users, one of them we know which is vigilante and other one is “slade” this could come in play later so don’t forget to look for any information that you can gain.
+
+Use mget <filename> to get the files to your local machine
+  
+![image](https://user-images.githubusercontent.com/118617364/202857172-93795942-8bc6-4412-b581-dccac52a78c0.png)
+
+Okay, let’s play with the images that we downloaded to our local machine with stego tools. https://0xrick.github.io/lists/stego/ you should checkout this list of useful tools written by Ahmed Hesham
+First, we tried to run exiftool bcs Sometimes important stuff is hidden in the metadata of the image or the file. However, nothing showed up 
+Then, we tried steghide that checks for any hidden or embedded data inside of image and audio files it only supports these file formats : JPEG, BMP, WAV and AU. If we look at the images we have here, only one image is jpg which steghide supports.
+  
+![image](https://user-images.githubusercontent.com/118617364/202857198-f313818c-a58a-4638-b76c-fb0960fbf1da.png)
+
+There a file embedded inside the aa.jpg, but it is encrypted with a password. Let’s see the other images maybe the clue is hidden somewhere in those .png ones
+
+We can open the other 2 images easily but the image Leave_me_alone.png  does not open. Let’s try to run file command to check the type 
