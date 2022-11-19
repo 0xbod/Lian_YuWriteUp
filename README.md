@@ -19,7 +19,7 @@ Anyway, let’s explore the webpage on port 80 maybe we will find something usef
 ![image](https://user-images.githubusercontent.com/118617364/202856738-dbbd0904-113d-47ef-955a-6bf95f1a15b9.png)
 
 Nothing interesting in the webpage here or even the page source as we should always view the page source.
-# #Step2: Finding hidding directories
+# #Step2: Finding hidden directories
 Running “gobsuter” to get any hidden directories from the webpage is our target now so let’s use the command: gobuster dir -u http://10.10.58.201 -w /usr/share/wordlists/dirb/big.txt
 
 ![image](https://user-images.githubusercontent.com/118617364/202856824-9b50c902-3e5d-43e4-8bba-a8041009da2d.png)
