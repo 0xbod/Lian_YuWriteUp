@@ -70,13 +70,60 @@ It’s time for steganography!!! Before we get distracted with the images. We sh
 Use mget <filename> to get the files to your local machine
   
 ![image](https://user-images.githubusercontent.com/118617364/202857172-93795942-8bc6-4412-b581-dccac52a78c0.png)
+# #Step4: steganography
 
-Okay, let’s play with the images that we downloaded to our local machine with stego tools. https://0xrick.github.io/lists/stego/ you should checkout this list of useful tools written by Ahmed Hesham
-First, we tried to run exiftool bcs Sometimes important stuff is hidden in the metadata of the image or the file. However, nothing showed up 
+Okay, let’s play with the images that we downloaded to our local machine with stego tools. https://0xrick.github.io/lists/stego/ you should checkout this list of useful tools written by Ahmed Hesham.
+  
+First, we tried to run exiftool bcs Sometimes important stuff is hidden in the metadata of the image or the file. However, nothing showed up
+  
 Then, we tried steghide that checks for any hidden or embedded data inside of image and audio files it only supports these file formats : JPEG, BMP, WAV and AU. If we look at the images we have here, only one image is jpg which steghide supports.
   
 ![image](https://user-images.githubusercontent.com/118617364/202857198-f313818c-a58a-4638-b76c-fb0960fbf1da.png)
 
 There a file embedded inside the aa.jpg, but it is encrypted with a password. Let’s see the other images maybe the clue is hidden somewhere in those .png ones
 
-We can open the other 2 images easily but the image Leave_me_alone.png  does not open. Let’s try to run file command to check the type 
+We can open the other 2 images easily but the image Leave_me_alone.png  does not open. Let’s try to run file command to check the type.
+  
+ ![image](https://user-images.githubusercontent.com/118617364/202857304-f30f06bf-08bf-434c-8562-11bd47ffb132.png)
+  
+Looks like that .png extension is not the real file type or the magic bytes are manipulated. We should check the magic bytes of Queen’s_gambit.png and compare it to Leave_me_alone.png 
+
+We can do that by using xxd command: xxd Leave_me_alone.png > magic.txt
+  
+ ![image](https://user-images.githubusercontent.com/118617364/202857338-c0deca74-9a84-4ddd-96ba-601080e4ad55.png)
+
+Save both files so we can read them easily out of the terminal 
+  
+  ![image](https://user-images.githubusercontent.com/118617364/202857493-aaa2194b-83e6-433b-9524-cad660549312.png)
+
+ As we expected the magic bytes of Leave_me_alone.png starts with XEo and that’s not how the magic bytes of PNG extensions should be.
+  
+Let’s open hexeditor [a tool already installed in kali] and change the bytes of Leave_me_alone.png with the bytes from Queen’s_gambit.png 
+
+  ![image](https://user-images.githubusercontent.com/118617364/202857504-baafd500-0bdf-486a-90fa-d70ea3582d0a.png)
+
+  The file now turned into real .PNG and we FINALLY get the image and this is how it looks
+
+![image](https://user-images.githubusercontent.com/118617364/202857509-4605b900-f526-43cf-8924-7ad9b17bfac5.png)
+
+  Remember that we had 3 files, the aa.jpg which we found by steghide, it has an embedded password protected file. Let’s now try to extract it using the “password” password in this image.
+  
+  ![image](https://user-images.githubusercontent.com/118617364/202857517-08fd527a-2c59-4991-b6ae-32aff23d9bf0.png)
+
+  The embedded zip file was ss.zip after extracting it we found passwd.txt which was a note from the machine owner [garbage] the real password was inside shado file.
+Let’s go back to the ssh, remember the use “slade” that we found his directory on ftp. 
+  
+  ![image](https://user-images.githubusercontent.com/118617364/202857525-3fcb515a-291a-4209-9b6c-31fdc9214c3e.png)
+# #Step5: privilege Escalation
+IT WORKED!!!!!!! We got a shell now and the user.txt flag is here.
+Time for privesc, the very first command I run is sudo -l to see if there is any command that we could run as root. 
+
+![image](https://user-images.githubusercontent.com/118617364/202857534-e765ffb0-212d-4b37-b31b-273349b404e7.png)
+  
+  Running the sudo -l, we find pkexec that we could run as root 
+Instantly go to https://gtfobins.github.io/ it has a great list of Unix binaries that can be used to bypass local security restrictions in misconfigured systems. Search for pkexec and you will find a command that elevates our privilege: sudo pkexec /bin/sh  
+Now we have gained root access. Let’s get the final flag.
+  
+  ![image](https://user-images.githubusercontent.com/118617364/202857540-a3d225da-eb13-4b71-8582-cbb7d290f473.png)
+
+### Thanks for reading this.
