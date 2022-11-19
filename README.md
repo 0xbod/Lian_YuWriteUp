@@ -1,7 +1,7 @@
 # TryHackMe Writeup 
 Lian_Yu Link to try hack me of GamingServer room - https://tryhackme.com/room/lianyu
 
-Hello Guys , Abdelrahman Mohamed. My username on THM is “Sylvesterr”.
+Hello Guys , I'm Abdelrahman Mohamed. My username on THM is “Sylvesterr”.
 
 # #Step1: Scanning the host
 First, we use NMAP to discover any open port on the host by running the command: nmap 10.10.58.201
