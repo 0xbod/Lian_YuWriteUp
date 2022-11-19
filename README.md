@@ -115,14 +115,14 @@ Let’s go back to the ssh, remember the use “slade” that we found his direc
   
   ![image](https://user-images.githubusercontent.com/118617364/202857525-3fcb515a-291a-4209-9b6c-31fdc9214c3e.png)
 # #Step5: privilege Escalation
-IT WORKED!!!!!!! We got a shell now and the user.txt flag is here.
+IT WORKED!!!!!!! We got a shell now and the user flag is here.
 Time for privesc, the very first command I run is sudo -l to see if there is any command that we could run as root. 
 
 ![image](https://user-images.githubusercontent.com/118617364/202857534-e765ffb0-212d-4b37-b31b-273349b404e7.png)
   
   Running the sudo -l, we find pkexec that we could run as root 
 Instantly go to https://gtfobins.github.io/ it has a great list of Unix binaries that can be used to bypass local security restrictions in misconfigured systems. Search for pkexec and you will find a command that elevates our privilege: sudo pkexec /bin/sh  
-Now we have gained root access. Let’s get the final flag.
+Now we have gained root access. Let’s get the final root flag.
   
   ![image](https://user-images.githubusercontent.com/118617364/202857540-a3d225da-eb13-4b71-8582-cbb7d290f473.png)
 
